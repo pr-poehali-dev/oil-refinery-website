@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import Icon from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
 import {
@@ -8,6 +8,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel';
+import RussiaMap from '@/components/RussiaMap';
 
 const HERO_IMG =
   'https://cdn.poehali.dev/projects/5e565af5-11b7-48d8-8116-c280b5700e17/files/2ac4cd66-edef-4015-8146-ff1ce72dbf74.jpg';
@@ -94,21 +95,6 @@ const PORTFOLIO = [
   { region: 'Свердловская область', city: 'Екатеринбург', unit: 'УВД-500', result: 'Перегонка мазута в газойль и гудрон', img: IMG_UVD },
 ];
 
-// Реальные города — координаты подобраны под SVG viewBox="0 0 1000 600"
-// Карта Russia: левый угол ~26° в.д., правый ~190° в.д., верх ~77° с.ш., низ ~41° с.ш.
-const MAP_POINTS = [
-  { city: 'Москва',        region: 'Московская обл.',   unit: 'КАУ-1 БАЗИС', img: IMG_KAU, x: 26.5, y: 42 },
-  { city: 'Казань',        region: 'Татарстан',          unit: 'КАУ-1 ПРО',   img: IMG_KAU, x: 33,   y: 41 },
-  { city: 'Краснодар',     region: 'Краснодарский край', unit: 'УСО',          img: IMG_USO, x: 24.5, y: 58 },
-  { city: 'Екатеринбург',  region: 'Свердловская обл.',  unit: 'УВД-500',      img: IMG_UVD, x: 41,   y: 37 },
-  { city: 'Самара',        region: 'Самарская обл.',      unit: 'КАУ-1 ЛАЙТ',  img: IMG_KAU, x: 35,   y: 48 },
-  { city: 'Уфа',           region: 'Башкортостан',        unit: 'УСО',          img: IMG_USO, x: 38,   y: 44 },
-  { city: 'Новосибирск',   region: 'Новосибирская обл.',  unit: 'КАУ-1 ПРО',   img: IMG_KAU, x: 56,   y: 47 },
-  { city: 'Тюмень',        region: 'Тюменская обл.',      unit: 'УВД-500',      img: IMG_UVD, x: 46,   y: 38 },
-  { city: 'Волгоград',     region: 'Волгоградская обл.',  unit: 'КАУ-1 БАЗИС', img: IMG_KAU, x: 30,   y: 53 },
-  { city: 'Оренбург',      region: 'Оренбургская обл.',   unit: 'УСО',          img: IMG_USO, x: 39,   y: 51 },
-];
-
 const CONFIGS = {
   'КАУ-1': [
     { id: 'light', name: 'ЛАЙТ', base: 1500000, note: 'Базовый крекинг до 1,5 м³/сутки' },
@@ -133,7 +119,7 @@ const OPTIONS = [
 
 const WA_NUMBER = '79283011045';
 const waLink = (text: string) =>
-  `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(text)}`;
+  'https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(text);
 
 const formatPrice = (n: number) =>
   new Intl.NumberFormat('ru-RU').format(n) + ' ₽';
@@ -142,6 +128,7 @@ export default function Index() {
   const [unit, setUnit] = useState<keyof typeof CONFIGS>('КАУ-1');
   const [configId, setConfigId] = useState('light');
   const [selectedOptions, setSelectedOptions] = useState<string[]>(['montage', 'training']);
+  const [clientName, setClientName] = useState('');
 
   const configs = CONFIGS[unit];
   const activeConfig = configs.find((c) => c.id === configId) ?? configs[0];
@@ -161,6 +148,21 @@ export default function Index() {
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
     );
 
+  const buildWaText = () => {
+    const nameLine = clientName.trim() ? 'Меня зовут ' + clientName.trim() + '.\n' : '';
+    const optionsLine = OPTIONS.filter((o) => selectedOptions.includes(o.id))
+      .map((o) => o.name)
+      .join(', ');
+    return (
+      'Здравствуйте! ' + nameLine +
+      'Хочу получить КП на установку:\n\n' +
+      'Модель: ' + unit + ' ' + activeConfig.name + '\n' +
+      'Базовая цена: ' + formatPrice(activeConfig.base) + '\n' +
+      (optionsLine ? 'Опции: ' + optionsLine + '\n' : '') +
+      'Итого: ' + formatPrice(total)
+    );
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground antialiased">
       {/* HEADER */}
@@ -176,11 +178,7 @@ export default function Index() {
           </a>
           <nav className="hidden lg:flex items-center gap-7">
             {NAV.map((n) => (
-              <a
-                key={n.href}
-                href={n.href}
-                className="text-sm text-muted-foreground hover:text-primary transition-colors"
-              >
+              <a key={n.href} href={n.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
                 {n.label}
               </a>
             ))}
@@ -230,7 +228,6 @@ export default function Index() {
             </div>
           </div>
         </div>
-        {/* advantages strip */}
         <div className="container relative px-4 md:px-8 pb-16">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-border/60 rounded-lg overflow-hidden border border-border/60">
             {ADVANTAGES.map((a) => (
@@ -283,7 +280,7 @@ export default function Index() {
         </Carousel>
       </section>
 
-      {/* SPECS / COMPLECTATION */}
+      {/* SPECS */}
       <section id="specs" className="border-y border-border bg-card/40">
         <div className="container px-4 md:px-8 py-24">
           <SectionHead eyebrow="Комплектация" title="Что входит в установку" subtitle="Полный комплект для запуска производства под ключ" />
@@ -303,32 +300,43 @@ export default function Index() {
       <section id="calc" className="container px-4 md:px-8 py-24">
         <SectionHead eyebrow="Калькулятор" title="Расчёт стоимости установки" subtitle="Выберите модель, комплектацию и опции — стоимость рассчитается автоматически" />
         <div className="mt-12 grid lg:grid-cols-5 gap-6">
-          {/* config */}
           <div className="lg:col-span-3 rounded-lg border border-border bg-card p-6 md:p-8">
-            <div className="text-xs uppercase tracking-wider text-muted-foreground mb-3">1. Модель установки</div>
+
+            {/* ШАГ 0 — Имя */}
+            <div className="text-xs uppercase tracking-wider text-muted-foreground mb-3">0. Ваше имя</div>
+            <div className="relative">
+              <Icon name="User" size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Как вас зовут?"
+                value={clientName}
+                onChange={(e) => setClientName(e.target.value)}
+                className="w-full rounded-md border border-border bg-background pl-9 pr-4 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
+              />
+            </div>
+
+            {/* ШАГ 1 — Модель */}
+            <div className="text-xs uppercase tracking-wider text-muted-foreground mt-8 mb-3">1. Модель установки</div>
             <div className="grid grid-cols-3 gap-3">
               {(Object.keys(CONFIGS) as (keyof typeof CONFIGS)[]).map((u) => (
                 <button
                   key={u}
                   onClick={() => selectUnit(u)}
-                  className={`rounded-md border p-4 text-left transition-colors ${
-                    unit === u ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/40'
-                  }`}
+                  className={`rounded-md border p-4 text-left transition-colors ${unit === u ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/40'}`}
                 >
                   <div className="font-display text-lg font-bold tracking-wide">{u}</div>
                 </button>
               ))}
             </div>
 
+            {/* ШАГ 2 — Комплектация */}
             <div className="text-xs uppercase tracking-wider text-muted-foreground mt-8 mb-3">2. Комплектация</div>
             <div className="grid sm:grid-cols-3 gap-3">
               {configs.map((c) => (
                 <button
                   key={c.id}
                   onClick={() => setConfigId(c.id)}
-                  className={`rounded-md border p-4 text-left transition-colors ${
-                    configId === c.id ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/40'
-                  }`}
+                  className={`rounded-md border p-4 text-left transition-colors ${configId === c.id ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/40'}`}
                 >
                   <div className="font-display text-base font-semibold tracking-wide">{c.name}</div>
                   <div className="mt-1 text-xs text-muted-foreground">{c.note}</div>
@@ -337,6 +345,7 @@ export default function Index() {
               ))}
             </div>
 
+            {/* ШАГ 3 — Опции */}
             <div className="text-xs uppercase tracking-wider text-muted-foreground mt-8 mb-3">3. Дополнительные опции</div>
             <div className="space-y-2">
               {OPTIONS.map((o) => {
@@ -345,9 +354,7 @@ export default function Index() {
                   <button
                     key={o.id}
                     onClick={() => toggleOption(o.id)}
-                    className={`w-full flex items-center justify-between rounded-md border p-3.5 transition-colors ${
-                      active ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/40'
-                    }`}
+                    className={`w-full flex items-center justify-between rounded-md border p-3.5 transition-colors ${active ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/40'}`}
                   >
                     <span className="flex items-center gap-3 text-sm">
                       <span className={`grid place-items-center w-5 h-5 rounded border ${active ? 'bg-primary border-primary' : 'border-border'}`}>
@@ -362,9 +369,15 @@ export default function Index() {
             </div>
           </div>
 
-          {/* result */}
+          {/* Итог */}
           <div className="lg:col-span-2">
             <div className="sticky top-24 rounded-lg border border-primary/40 bg-card p-6 md:p-8 glow-orange">
+              {clientName.trim() && (
+                <div className="mb-4 px-3 py-2 rounded-md bg-primary/10 text-sm">
+                  <span className="text-muted-foreground">Заявка от: </span>
+                  <span className="font-semibold text-primary">{clientName.trim()}</span>
+                </div>
+              )}
               <div className="text-xs uppercase tracking-wider text-muted-foreground">Ваша конфигурация</div>
               <div className="mt-2 font-display text-3xl font-bold tracking-wide">
                 {unit} <span className="text-primary">{activeConfig.name}</span>
@@ -386,24 +399,15 @@ export default function Index() {
                 <div className="font-display text-4xl font-bold text-primary mt-1">{formatPrice(total)}</div>
                 <p className="mt-2 text-xs text-muted-foreground">Предварительный расчёт. Точная цена — после уточнения сырья и задач.</p>
               </div>
-              <Button asChild size="lg" className="w-full mt-6 font-display tracking-wide h-12 bg-[#25D366] hover:bg-[#25D366]/90 text-black">
-                <a
-                  href={waLink(
-                    `Здравствуйте! Хочу получить КП на установку:\n\n` +
-                    `Модель: ${unit} ${activeConfig.name}\n` +
-                    `Базовая цена: ${formatPrice(activeConfig.base)}\n` +
-                    (OPTIONS.filter(o => selectedOptions.includes(o.id)).length
-                      ? `Опции: ${OPTIONS.filter(o => selectedOptions.includes(o.id)).map(o => o.name).join(', ')}\n`
-                      : '') +
-                    `Итого: ${formatPrice(total)}`
-                  )}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Icon name="MessageCircle" size={18} className="mr-2" />
-                  Отправить заявку в WhatsApp
-                </a>
-              </Button>
+              <a
+                href={waLink(buildWaText())}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-6 w-full h-12 rounded-md inline-flex items-center justify-center gap-2 font-display tracking-wide text-sm font-semibold bg-[#25D366] hover:bg-[#1ebe5d] text-black transition-colors"
+              >
+                <Icon name="MessageCircle" size={18} />
+                Отправить заявку в WhatsApp
+              </a>
             </div>
           </div>
         </div>
@@ -461,8 +465,6 @@ export default function Index() {
             </div>
           ))}
         </div>
-
-        {/* MAP */}
         <RussiaMap />
       </section>
 
@@ -509,24 +511,31 @@ export default function Index() {
               </div>
             </div>
             <div className="flex flex-col gap-3">
-              <Button asChild size="lg" className="font-display tracking-wide h-12 bg-[#25D366] hover:bg-[#25D366]/90 text-black">
-                <a href={waLink('Здравствуйте! Хочу узнать подробнее об оборудовании для нефтепереработки.')} target="_blank" rel="noopener noreferrer">
-                  <Icon name="MessageCircle" size={18} className="mr-2" />
-                  Написать в WhatsApp
-                </a>
-              </Button>
-              <Button asChild size="lg" className="font-display tracking-wide h-12 bg-[#229ED9] hover:bg-[#229ED9]/90 text-white">
-                <a href="https://t.me/+79283011045" target="_blank" rel="noopener noreferrer">
-                  <Icon name="Send" size={18} className="mr-2" />
-                  Написать в Telegram
-                </a>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="font-display tracking-wide h-12 border-border">
-                <a href="mailto:islamteresev352@gmail.com">
-                  <Icon name="Mail" size={18} className="mr-2" />
-                  Отправить запрос на почту
-                </a>
-              </Button>
+              <a
+                href={waLink('Здравствуйте! Хочу узнать подробнее об оборудовании для нефтепереработки.')}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="h-12 rounded-md inline-flex items-center justify-center gap-2 font-display tracking-wide text-sm font-semibold bg-[#25D366] hover:bg-[#1ebe5d] text-black transition-colors px-6"
+              >
+                <Icon name="MessageCircle" size={18} />
+                Написать в WhatsApp
+              </a>
+              <a
+                href="https://t.me/+79283011045"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="h-12 rounded-md inline-flex items-center justify-center gap-2 font-display tracking-wide text-sm font-semibold bg-[#229ED9] hover:bg-[#1a8ec5] text-white transition-colors px-6"
+              >
+                <Icon name="Send" size={18} />
+                Написать в Telegram
+              </a>
+              <a
+                href="mailto:islamteresev352@gmail.com"
+                className="h-12 rounded-md inline-flex items-center justify-center gap-2 font-display tracking-wide text-sm font-semibold border border-border hover:border-primary/50 text-foreground transition-colors px-6"
+              >
+                <Icon name="Mail" size={18} />
+                Отправить запрос на почту
+              </a>
             </div>
           </div>
         </div>
@@ -567,138 +576,6 @@ function SectionHead({
       </div>
       <h2 className="mt-3 font-display text-4xl md:text-5xl font-bold tracking-tight text-balance">{title}</h2>
       {subtitle && <p className="mt-4 text-muted-foreground">{subtitle}</p>}
-    </div>
-  );
-}
-
-const RUSSIA_PATH = "M 60 260 L 70 240 L 80 220 L 100 200 L 120 190 L 130 175 L 150 165 L 155 150 L 170 140 L 185 130 L 200 125 L 210 115 L 230 110 L 245 105 L 260 100 L 270 95 L 285 90 L 300 88 L 315 85 L 330 83 L 345 82 L 360 80 L 375 78 L 390 76 L 405 75 L 420 74 L 435 73 L 450 72 L 465 72 L 480 73 L 495 74 L 510 75 L 525 77 L 540 79 L 555 81 L 570 83 L 585 86 L 600 89 L 615 92 L 630 96 L 645 100 L 660 104 L 675 108 L 690 113 L 705 118 L 720 123 L 735 129 L 750 135 L 760 142 L 770 150 L 780 158 L 790 165 L 800 170 L 815 175 L 825 180 L 835 187 L 845 195 L 855 203 L 865 212 L 875 222 L 882 233 L 888 245 L 892 257 L 895 270 L 896 283 L 895 296 L 892 308 L 887 319 L 880 329 L 872 337 L 863 344 L 853 350 L 842 355 L 830 358 L 818 360 L 806 361 L 795 360 L 784 358 L 774 354 L 765 349 L 758 343 L 752 336 L 748 328 L 746 320 L 745 312 L 746 303 L 748 295 L 751 288 L 755 282 L 750 276 L 740 272 L 728 270 L 716 270 L 705 272 L 695 276 L 686 282 L 679 290 L 675 299 L 673 308 L 673 318 L 676 327 L 681 335 L 688 342 L 696 347 L 704 350 L 712 351 L 718 349 L 700 370 L 688 382 L 674 392 L 658 400 L 640 406 L 620 410 L 600 412 L 580 412 L 560 411 L 540 410 L 520 410 L 500 411 L 480 412 L 460 412 L 440 411 L 420 409 L 400 408 L 382 410 L 366 415 L 352 422 L 340 430 L 328 435 L 314 437 L 300 435 L 288 430 L 276 422 L 264 414 L 252 408 L 240 404 L 228 403 L 216 404 L 204 407 L 192 410 L 180 411 L 168 410 L 156 406 L 144 400 L 132 392 L 120 384 L 108 376 L 96 370 L 84 366 L 72 364 L 63 365 L 57 369 L 54 376 L 55 385 L 59 394 L 60 390 L 58 380 L 58 370 L 60 363 L 64 357 L 68 350 L 70 343 L 70 335 L 68 327 L 64 319 L 60 311 L 57 302 L 55 293 L 54 284 L 55 275 L 57 267 L 60 260 Z";
-
-function RussiaMap() {
-  const [active, setActive] = useState<number | null>(null);
-  const popupRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (popupRef.current && !popupRef.current.contains(e.target as Node)) {
-        setActive(null);
-      }
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, []);
-
-  const point = active !== null ? MAP_POINTS[active] : null;
-
-  return (
-    <div className="mt-16 rounded-2xl border border-border bg-card/40 p-6 md:p-10 relative overflow-hidden">
-      <div className="absolute inset-0 bg-grid opacity-20" />
-      <div className="relative">
-        <div className="inline-flex items-center gap-2 text-primary text-xs font-semibold tracking-wider uppercase mb-6">
-          <span className="w-6 h-px bg-primary" />
-          География поставок — {MAP_POINTS.length} городов России
-        </div>
-        <div className="grid lg:grid-cols-[1fr_260px] gap-8 items-start">
-          {/* SVG MAP */}
-          <div className="relative w-full" ref={popupRef}>
-            <svg
-              viewBox="0 0 1000 520"
-              className="w-full"
-              style={{ filter: 'drop-shadow(0 0 24px hsl(24 95% 53% / 0.08))' }}
-            >
-              {/* Силуэт России */}
-              <path
-                d={RUSSIA_PATH}... [truncated]
-                fill="hsl(var(--card))"
-                stroke="hsl(var(--border))"
-                strokeWidth="1.5"
-              />
-              {/* Точки городов */}
-              {MAP_POINTS.map((m, i) => {
-                const cx = (m.x / 100) * 1000;
-                const cy = (m.y / 100) * 520;
-                const isActive = active === i;
-                return (
-                  <g key={m.city} style={{ cursor: 'pointer' }} onClick={() => setActive(active === i ? null : i)}>
-                    <circle cx={cx} cy={cy} r={18} fill="hsl(24 95% 53% / 0.15)" />
-                    <circle
-                      cx={cx} cy={cy} r={8}
-                      fill={isActive ? 'hsl(24 95% 53%)' : 'hsl(24 95% 53%)'}
-                      stroke="hsl(var(--background))"
-                      strokeWidth="2"
-                    />
-                    {isActive && (
-                      <circle cx={cx} cy={cy} r={14} fill="none" stroke="hsl(24 95% 53%)" strokeWidth="2" opacity="0.6" />
-                    )}
-                    <text
-                      x={cx}
-                      y={cy + 26}
-                      textAnchor="middle"
-                      fill="hsl(var(--foreground))"
-                      fontSize="11"
-                      fontFamily="Oswald, sans-serif"
-                      fontWeight="500"
-                      opacity="0.85"
-                    >
-                      {m.city}
-                    </text>
-                  </g>
-                );
-              })}
-            </svg>
-
-            {/* Попап с фото при клике */}
-            {point && (
-              <div
-                className="absolute z-20 rounded-xl border border-primary/50 bg-card shadow-2xl overflow-hidden w-64"
-                style={{
-                  left: `${point.x}%`,
-                  top: `${point.y}%`,
-                  transform: 'translate(-50%, -110%)',
-                }}
-              >
-                <div className="relative aspect-[16/9]">
-                  <img src={point.img} alt={point.unit} className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-card/80 to-transparent" />
-                  <button
-                    onClick={() => setActive(null)}
-                    className="absolute top-2 right-2 grid place-items-center w-6 h-6 rounded-full bg-background/70 hover:bg-background text-foreground transition-colors"
-                  >
-                    <Icon name="X" size={13} />
-                  </button>
-                </div>
-                <div className="p-3">
-                  <div className="flex items-center gap-1.5 text-primary text-xs">
-                    <Icon name="MapPin" size={12} />
-                    <span>{point.city} — {point.region}</span>
-                  </div>
-                  <div className="mt-1 font-display text-base font-bold">{point.unit}</div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Список городов */}
-          <div className="lg:border-l border-border lg:pl-8">
-            <div className="font-display text-5xl font-bold text-primary">{MAP_POINTS.length}</div>
-            <div className="text-sm text-muted-foreground mt-1 mb-5">городов с нашими установками</div>
-            <div className="space-y-1">
-              {MAP_POINTS.map((m, i) => (
-                <button
-                  key={m.city}
-                  onClick={() => setActive(active === i ? null : i)}
-                  className={`w-full flex items-center gap-2 text-sm rounded-md px-3 py-2 text-left transition-colors ${
-                    active === i ? 'bg-primary/10 text-primary' : 'hover:bg-secondary text-foreground'
-                  }`}
-                >
-                  <Icon name="MapPin" size={14} className={active === i ? 'text-primary' : 'text-muted-foreground'} />
-                  <span className="font-display tracking-wide">{m.city}</span>
-                  <span className="text-muted-foreground text-xs ml-auto">{m.unit}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
