@@ -131,6 +131,10 @@ const OPTIONS = [
   { id: 'delivery', name: 'Доставка по России', price: 240000 },
 ];
 
+const WA_NUMBER = '79283011045';
+const waLink = (text: string) =>
+  `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(text)}`;
+
 const formatPrice = (n: number) =>
   new Intl.NumberFormat('ru-RU').format(n) + ' ₽';
 
@@ -382,10 +386,22 @@ export default function Index() {
                 <div className="font-display text-4xl font-bold text-primary mt-1">{formatPrice(total)}</div>
                 <p className="mt-2 text-xs text-muted-foreground">Предварительный расчёт. Точная цена — после уточнения сырья и задач.</p>
               </div>
-              <Button asChild size="lg" className="w-full mt-6 font-display tracking-wide h-12">
-                <a href="#contacts">
-                  <Icon name="Send" size={18} className="mr-2" />
-                  Получить КП
+              <Button asChild size="lg" className="w-full mt-6 font-display tracking-wide h-12 bg-[#25D366] hover:bg-[#25D366]/90 text-black">
+                <a
+                  href={waLink(
+                    `Здравствуйте! Хочу получить КП на установку:\n\n` +
+                    `Модель: ${unit} ${activeConfig.name}\n` +
+                    `Базовая цена: ${formatPrice(activeConfig.base)}\n` +
+                    (OPTIONS.filter(o => selectedOptions.includes(o.id)).length
+                      ? `Опции: ${OPTIONS.filter(o => selectedOptions.includes(o.id)).map(o => o.name).join(', ')}\n`
+                      : '') +
+                    `Итого: ${formatPrice(total)}`
+                  )}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Icon name="MessageCircle" size={18} className="mr-2" />
+                  Отправить заявку в WhatsApp
                 </a>
               </Button>
             </div>
@@ -494,13 +510,13 @@ export default function Index() {
             </div>
             <div className="flex flex-col gap-3">
               <Button asChild size="lg" className="font-display tracking-wide h-12 bg-[#25D366] hover:bg-[#25D366]/90 text-black">
-                <a href="#">
+                <a href={waLink('Здравствуйте! Хочу узнать подробнее об оборудовании для нефтепереработки.')} target="_blank" rel="noopener noreferrer">
                   <Icon name="MessageCircle" size={18} className="mr-2" />
                   Написать в WhatsApp
                 </a>
               </Button>
               <Button asChild size="lg" className="font-display tracking-wide h-12 bg-[#229ED9] hover:bg-[#229ED9]/90 text-white">
-                <a href="#">
+                <a href="https://t.me/+79283011045" target="_blank" rel="noopener noreferrer">
                   <Icon name="Send" size={18} className="mr-2" />
                   Написать в Telegram
                 </a>
@@ -555,6 +571,8 @@ function SectionHead({
   );
 }
 
+const RUSSIA_PATH = "M 60 260 L 70 240 L 80 220 L 100 200 L 120 190 L 130 175 L 150 165 L 155 150 L 170 140 L 185 130 L 200 125 L 210 115 L 230 110 L 245 105 L 260 100 L 270 95 L 285 90 L 300 88 L 315 85 L 330 83 L 345 82 L 360 80 L 375 78 L 390 76 L 405 75 L 420 74 L 435 73 L 450 72 L 465 72 L 480 73 L 495 74 L 510 75 L 525 77 L 540 79 L 555 81 L 570 83 L 585 86 L 600 89 L 615 92 L 630 96 L 645 100 L 660 104 L 675 108 L 690 113 L 705 118 L 720 123 L 735 129 L 750 135 L 760 142 L 770 150 L 780 158 L 790 165 L 800 170 L 815 175 L 825 180 L 835 187 L 845 195 L 855 203 L 865 212 L 875 222 L 882 233 L 888 245 L 892 257 L 895 270 L 896 283 L 895 296 L 892 308 L 887 319 L 880 329 L 872 337 L 863 344 L 853 350 L 842 355 L 830 358 L 818 360 L 806 361 L 795 360 L 784 358 L 774 354 L 765 349 L 758 343 L 752 336 L 748 328 L 746 320 L 745 312 L 746 303 L 748 295 L 751 288 L 755 282 L 750 276 L 740 272 L 728 270 L 716 270 L 705 272 L 695 276 L 686 282 L 679 290 L 675 299 L 673 308 L 673 318 L 676 327 L 681 335 L 688 342 L 696 347 L 704 350 L 712 351 L 718 349 L 700 370 L 688 382 L 674 392 L 658 400 L 640 406 L 620 410 L 600 412 L 580 412 L 560 411 L 540 410 L 520 410 L 500 411 L 480 412 L 460 412 L 440 411 L 420 409 L 400 408 L 382 410 L 366 415 L 352 422 L 340 430 L 328 435 L 314 437 L 300 435 L 288 430 L 276 422 L 264 414 L 252 408 L 240 404 L 228 403 L 216 404 L 204 407 L 192 410 L 180 411 L 168 410 L 156 406 L 144 400 L 132 392 L 120 384 L 108 376 L 96 370 L 84 366 L 72 364 L 63 365 L 57 369 L 54 376 L 55 385 L 59 394 L 60 390 L 58 380 L 58 370 L 60 363 L 64 357 L 68 350 L 70 343 L 70 335 L 68 327 L 64 319 L 60 311 L 57 302 L 55 293 L 54 284 L 55 275 L 57 267 L 60 260 Z";
+
 function RussiaMap() {
   const [active, setActive] = useState<number | null>(null);
   const popupRef = useRef<HTMLDivElement>(null);
@@ -589,7 +607,7 @@ function RussiaMap() {
             >
               {/* Силуэт России */}
               <path
-                d="M 60 260 L 70 240 L 80 220 L 100 200 L 120 190 L 130 175 L 150 165 L 155 150 L 170 140 L 185 130 L 200 125 L 210 115 L 230 110 L 245 105 L 260 100 L 270 95 L 285 90 L 300 88 L 315 85 L 330 83 L 345 82 L 360 80 L 375 78 L 390 76 L 405 75 L 420 74 L 435 73 L 450 72 L 465 72 L 480 73 L 495 74 L 510 75 L 525 77 L 540 79 L 555 81 L 570 83 L 585 86 L 600 89 L 615 92 L 630 96 L 645 100 L 660 104 L 675 108 L 690 113 L 705 118 L 720 123 L 735 129 L 750 135 L 760 142 L 770 150 L 780 158 L 790 165 L 800 170 L 815 175 L 825 180 L 835 187 L 845 195 L 855 203 L 865 212 L 875 222 L 882 233 L 888 245 L 892 257 L 895 270 L 896 283 L 895 296 L 892 308 L 887 319 L 880 329 L 872 337 L 863 344 L 853 350 L 842 355 L 830 358 L 818 360 L 806 361 L 795 360 L 784 358 L 774 354 L 765 349 L 758 343 L 752 336 L 748 328 L 746 320 L 745 312 L 746 303 L 748 295 L 751 288 L 755 282 L 758 276 L 759 271 L 758 266 L 754 262 L 748 259 L 740 257 L 731 256 L 721 256 L 711 258 L 701 261 L 692 265 L 683 270 L 675 276 L 668 283 L 662 290 L 658 298 L 655 306 L 654 315 L 655 323 L 658 331 L 662 338 L 668 344 L 674 349 L 681 353 L 688 355 L 695 356 L 701 355 L 706 353 L 709 350 L 710 346 L 709 342 L 706 339 L 702 337 L 697 336 L 692 336 L 688 337 L 685 340 L 683 344 L 683 348 L 685 352 L 688 355 L 692 357 L 697 358 L 701 358 L 706 357 L 710 354 L 713 351 L 715 347 L 714 342 L 712 338 L 707 334 L 701 332 L 694 330 L 688 330 L 682 332 L 677 335 L 674 339 L 673 344 L 675 349 L 679 354 L 685 358 L 692 361 L 699 362 L 706 362 L 713 360 L 719 357 L 723 353 L 726 347 L 726 341 L 723 335 L 718 329 L 711 324 L 703 320 L 695 318 L 687 317 L 679 318 L 672 321 L 666 325 L 661 331 L 658 338 L 657 345 L 658 352 L 661 358 L 666 364 L 672 368 L 679 371 L 687 372 L 695 372 L 703 370 L 710 366 L 716 361 L 720 354 L 723 347 L 723 339 L 721 332 L 717 325 L 710 319 L 702 315 L 693 312 L 685 312 L 677 314 L 670 318 L 665 323 L 662 330 L 661 337 L 662 344 L 665 350 L 670 356 L 676 361 L 683 365 L 691 367 L 698 367 L 705 365 L 711 361 L 715 356 L 717 350 L 717 344 L 715 338 L 711 332 L 704 328 L 697 325 L 689 324 L 681 325 L 675 328 L 670 333 L 667 339 L 667 346 L 669 352 L 674 358 L 680 363 L 688 367 L 695 368 L 702 368 L 708 366 L 713 362 L 717 357 L 718 351 L 717 344 L 714 338 L 708 332 L 701 328 L 693 326 L 685 326 L 678 329 L 672 333 L 668 339 L 667 346 L 668 353 L 672 360 L 678 366 L 685 370 L 693 372 L 701 372 L 708 369 L 715 365 L 719 359 L 721 352 L 720 345 L 717 338 L 711 332 L 703 328 L 694 325 L 686 325 L 678 328 L 672 333 L 668 340 L 667 347 L 669 354 L 674 361 L 681 366 L 689 370 L 697 371 L 704 370 L 710 367 L 715 362 L 717 355 L 716 348 L 712 342 L 706 336 L 699 332 L 691 330 L 683 330 L 676 333 L 671 338 L 668 344 L 668 351 L 671 358 L 677 364 L 684 368 L 692 371 L 700 371 L 707 369 L 713 365 L 718 360 L 720 353 L 719 346 L 716 339 L 710 333 L 703 329 L 694 327 L 686 327 L 678 330 L 673 335 L 669 342 L 668 349 L 670 357 L 675 363 L 682 368 L 690 371 L 698 372 L 706 371 L 712 368 L 717 363 L 720 356 L 720 349 L 717 342 L 712 336 L 704 331 L 696 329 L 688 329 L 680 332 L 674 337 L 670 344 L 669 351 L 671 359 L 677 365 L 684 369 L 692 372 L 700 372 L 707 370 L 713 366 L 717 361 L 719 354 L 718 347 L 715 341 L 709 335 L 702 331 L 694 329 L 686 329 L 679 332 L 673 337 L 669 344 L 669 351 L 671 358 L 677 364 L 684 369 L 692 371 L 700 372 L 707 370 L 713 366 L 700 390 L 690 400 L 680 410 L 665 415 L 650 418 L 630 420 L 615 418 L 600 414 L 585 410 L 570 408 L 555 408 L 540 410 L 525 413 L 510 415 L 495 416 L 480 416 L 465 414 L 450 412 L 435 410 L 420 410 L 405 411 L 395 415 L 385 420 L 375 426 L 365 430 L 350 432 L 335 430 L 325 425 L 315 418 L 305 410 L 295 402 L 285 396 L 275 392 L 265 390 L 255 390 L 245 392 L 235 396 L 225 400 L 215 403 L 205 404 L 195 402 L 185 398 L 175 392 L 165 385 L 155 378 L 145 372 L 135 368 L 125 366 L 115 366 L 105 368 L 95 372 L 85 378 L 75 385 L 65 390 L 55 393 L 50 392 L 48 387 L 50 380 L 55 372 L 62 363 L 68 353 L 72 343 L 73 333 L 71 323 L 66 313 L 60 304 L 55 295 L 52 286 L 51 278 L 52 270 L 55 263 L 60 260 Z"
+                d={RUSSIA_PATH}... [truncated]
                 fill="hsl(var(--card))"
                 stroke="hsl(var(--border))"
                 strokeWidth="1.5"
