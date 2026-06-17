@@ -11,6 +11,12 @@ import {
 
 const HERO_IMG =
   'https://cdn.poehali.dev/projects/5e565af5-11b7-48d8-8116-c280b5700e17/files/2ac4cd66-edef-4015-8146-ff1ce72dbf74.jpg';
+const IMG_KAU =
+  'https://cdn.poehali.dev/projects/5e565af5-11b7-48d8-8116-c280b5700e17/files/35bf8bea-fdee-4ec5-9931-57a6edf3418a.jpg';
+const IMG_UVD =
+  'https://cdn.poehali.dev/projects/5e565af5-11b7-48d8-8116-c280b5700e17/files/2b7822f1-0827-477e-8752-5e26bb973b15.jpg';
+const IMG_USO =
+  'https://cdn.poehali.dev/projects/5e565af5-11b7-48d8-8116-c280b5700e17/files/d15fe0cd-cf6b-489f-98aa-a9662d1995de.jpg';
 
 const NAV = [
   { label: 'Оборудование', href: '#equipment' },
@@ -83,9 +89,21 @@ const SERVICES = [
 ];
 
 const PORTFOLIO = [
-  { region: 'Республика Татарстан', unit: 'КАУ-1 ПРО', result: '3 м³/сутки, окупаемость 9 мес.' },
-  { region: 'Краснодарский край', unit: 'УСО', result: 'Доочистка отработанных масел 450 л/ч' },
-  { region: 'Свердловская область', unit: 'УВД-500', result: 'Перегонка мазута в газойль и гудрон' },
+  { region: 'Республика Татарстан', city: 'Казань', unit: 'КАУ-1 ПРО', result: '3 м³/сутки, окупаемость 9 мес.', img: IMG_KAU },
+  { region: 'Краснодарский край', city: 'Краснодар', unit: 'УСО', result: 'Доочистка отработанных масел 450 л/ч', img: IMG_USO },
+  { region: 'Свердловская область', city: 'Екатеринбург', unit: 'УВД-500', result: 'Перегонка мазута в газойль и гудрон', img: IMG_UVD },
+];
+
+// Точки на стилизованной карте России (x,y в % от области карты)
+const MAP_POINTS = [
+  { city: 'Москва', region: 'Московская обл.', unit: 'КАУ-1 БАЗИС', x: 27, y: 47 },
+  { city: 'Казань', region: 'Татарстан', unit: 'КАУ-1 ПРО', x: 35, y: 45 },
+  { city: 'Краснодар', region: 'Краснодарский край', unit: 'УСО', x: 22, y: 64 },
+  { city: 'Екатеринбург', region: 'Свердловская обл.', unit: 'УВД-500', x: 44, y: 40 },
+  { city: 'Самара', region: 'Самарская обл.', unit: 'КАУ-1 ЛАЙТ', x: 34, y: 52 },
+  { city: 'Уфа', region: 'Башкортостан', unit: 'УСО', x: 40, y: 47 },
+  { city: 'Новосибирск', region: 'Новосибирская обл.', unit: 'КАУ-1 ПРО', x: 57, y: 50 },
+  { city: 'Тюмень', region: 'Тюменская обл.', unit: 'УВД-500', x: 47, y: 38 },
 ];
 
 const CONFIGS = {
@@ -404,18 +422,75 @@ export default function Index() {
 
       {/* PORTFOLIO */}
       <section id="portfolio" className="container px-4 md:px-8 py-24">
-        <SectionHead eyebrow="Портфолио" title="Реализованные проекты" subtitle="Установки работают на производствах по всей стране" />
+        <SectionHead eyebrow="Портфолио" title="Наши проекты" subtitle="Установки работают на производствах по всей стране" />
         <div className="mt-12 grid md:grid-cols-3 gap-6">
           {PORTFOLIO.map((p) => (
-            <div key={p.region} className="rounded-lg border border-border bg-card p-6 hover:border-primary/50 transition-colors">
-              <div className="flex items-center gap-2 text-primary">
-                <Icon name="MapPin" size={18} />
-                <span className="font-display text-sm tracking-wide">{p.region}</span>
+            <div key={p.region} className="group rounded-lg border border-border bg-card overflow-hidden hover:border-primary/50 transition-colors">
+              <div className="relative aspect-[4/3] overflow-hidden">
+                <img src={p.img} alt={p.unit} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                <div className="absolute inset-0 bg-gradient-to-t from-card via-card/30 to-transparent" />
+                <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-background/80 backdrop-blur text-primary text-xs font-display tracking-wide">
+                  <Icon name="MapPin" size={13} />
+                  {p.city}
+                </span>
               </div>
-              <div className="mt-4 font-display text-2xl font-bold">{p.unit}</div>
-              <p className="mt-2 text-sm text-muted-foreground">{p.result}</p>
+              <div className="p-6">
+                <div className="text-xs text-muted-foreground">{p.region}</div>
+                <div className="mt-1 font-display text-2xl font-bold">{p.unit}</div>
+                <p className="mt-2 text-sm text-muted-foreground">{p.result}</p>
+              </div>
             </div>
           ))}
+        </div>
+
+        {/* MAP */}
+        <div className="mt-16 rounded-2xl border border-border bg-card/40 p-6 md:p-10 relative overflow-hidden">
+          <div className="absolute inset-0 bg-grid opacity-20" />
+          <div className="relative grid lg:grid-cols-[1fr_280px] gap-8 items-center">
+            <div className="relative">
+              <div className="inline-flex items-center gap-2 text-primary text-xs font-semibold tracking-wider uppercase mb-4">
+                <span className="w-6 h-px bg-primary" />
+                География поставок
+              </div>
+              <div className="relative w-full aspect-[2/1]">
+                <img
+                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Russia_outline_map.svg/1024px-Russia_outline_map.svg.png"
+                  alt="Карта России"
+                  className="absolute inset-0 w-full h-full object-contain opacity-25 invert"
+                />
+                {MAP_POINTS.map((m) => (
+                  <div
+                    key={m.city}
+                    className="group absolute -translate-x-1/2 -translate-y-1/2"
+                    style={{ left: `${m.x}%`, top: `${m.y}%` }}
+                  >
+                    <span className="block w-3 h-3 rounded-full bg-primary shadow-[0_0_0_4px_hsl(24_95%_53%/0.25)]" />
+                    <span className="absolute left-1/2 -translate-x-1/2 inline-block w-3 h-3 rounded-full bg-primary animate-ping top-0" />
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 whitespace-nowrap">
+                      <div className="rounded-md border border-border bg-background px-3 py-2 text-left shadow-xl">
+                        <div className="font-display text-sm font-bold">{m.city}</div>
+                        <div className="text-[11px] text-muted-foreground">{m.region}</div>
+                        <div className="text-[11px] text-primary mt-0.5">{m.unit}</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <div className="font-display text-5xl font-bold text-primary">{MAP_POINTS.length}+</div>
+              <div className="text-sm text-muted-foreground mt-1 mb-6">регионов с нашими установками</div>
+              <div className="space-y-2 max-h-64 overflow-auto pr-1">
+                {MAP_POINTS.map((m) => (
+                  <div key={m.city} className="flex items-center gap-3 text-sm">
+                    <Icon name="MapPin" size={15} className="text-primary shrink-0" />
+                    <span className="font-display tracking-wide">{m.city}</span>
+                    <span className="text-muted-foreground text-xs ml-auto">{m.unit}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
